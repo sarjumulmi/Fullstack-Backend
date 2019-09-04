@@ -15,6 +15,7 @@ let persons = [
 const app = express()
 app.use(bodyParser.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :res-body '))
+app.use(express.static('build'))
 
 app.get('/api/persons', (req, res) => {
   res.status(200).json(persons)
@@ -60,14 +61,16 @@ app.get('/info', (req, res) => {
   `)
 })
 
-app.get('/', (req, res) => {
-  res.status(200).json({hello: 'world'})
-})
+// app.get('/', (req, res) => {
+//   res.status(200).json({hello: 'world'})
+// })
 
-app.get('*', (req, res) => {
-  res.status(404).json({msg: 'route not found'})
-})
+// app.get('*', (req, res) => {
+//   res.status(404).json({msg: 'route not found'})
+// })
 
-app.listen(3000, () => {
-  console.log(`App listening on port 3000`);
+
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
 })
