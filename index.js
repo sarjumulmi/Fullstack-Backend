@@ -26,23 +26,14 @@ app.get('/api/persons', (req, res) => {
   })
 })
 
-app.post('/api/persons', (req, res) => {
-  if (!req.body.name) {
-    return res.status(400).send({error: 'body must contain name'})
-  }
-  if (!req.body.number) {
-    return res.status(400).send({error: 'body must contain number'})
-  }
-  // const personExists = persons.map(p => p.name).includes(req.body.name)
-  // if (personExists) {
-  //   return res.status(400).send({error: 'name must be unique'})
-  // }
-
+app.post('/api/persons', (req, res, next) => {
   const newPerson = new Person({...req.body})
+  console.log('req body: ', req.body);
   newPerson.save()
     .then(person => {
       res.json(person.toJSON())
     })
+    .catch(err => next(err))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
@@ -75,7 +66,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 })
 
 app.get('/info', (req, res, next) => {
-  Person.count({})
+  Person.countDocuments({})
     .then(count => {
       res.send(`
         <p>Phonebook has info for ${count} people</p>
@@ -89,6 +80,8 @@ const errorHandler = (err, req, res, next) => {
   console.log(err.message);
   if (err.name === 'CastError' && err.kind === 'ObjectId') {
     return res.status(400).send({error: 'malformed id'})
+  } else if (err.name === 'ValidationError') {
+    return res.status(400).send({error: err.message})
   }
   next(err)
 }
