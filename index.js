@@ -3,7 +3,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 
-morgan.token('res-body', function getId (req) {
+morgan.token('res-body', function getId(req) {
   return JSON.stringify(req.body)
 })
 
@@ -22,13 +22,15 @@ app.use(express.static('build'))
 
 app.get('/api/persons', (req, res) => {
   Person.find({}).then(persons => {
-    res.status(200).json(persons.map( p => p.toJSON()))
+    res.status(200).json(persons.map(p => p.toJSON()))
   })
 })
 
 app.post('/api/persons', (req, res, next) => {
-  const newPerson = new Person({...req.body})
-  console.log('req body: ', req.body);
+  const newPerson = new Person({
+    ...req.body
+  })
+  console.log('req body: ', req.body)
   newPerson.save()
     .then(person => {
       res.json(person.toJSON())
@@ -43,22 +45,26 @@ app.get('/api/persons/:id', (req, res, next) => {
         res.json(person.toJSON())
       } else {
         res.status(404).end()
-      }  
+      }
     })
     .catch(err => next(err))
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndRemove(req.params.id)
-    .then(result => {
+    .then(() => {
       res.status(204).end()
     })
     .catch(err => next(err))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-  const person = {...req.body}
-  Person.findByIdAndUpdate(req.params.id, person, {new: true})
+  const person = {
+    ...req.body
+  }
+  Person.findByIdAndUpdate(req.params.id, person, {
+    new: true
+  })
     .then(updatedPerson => {
       res.json(updatedPerson.toJSON())
     })
@@ -77,11 +83,15 @@ app.get('/info', (req, res, next) => {
 })
 
 const errorHandler = (err, req, res, next) => {
-  console.log(err.message);
+  console.log(err.message)
   if (err.name === 'CastError' && err.kind === 'ObjectId') {
-    return res.status(400).send({error: 'malformed id'})
+    return res.status(400).send({
+      error: 'malformed id'
+    })
   } else if (err.name === 'ValidationError') {
-    return res.status(400).send({error: err.message})
+    return res.status(400).send({
+      error: err.message
+    })
   }
   next(err)
 }
@@ -90,5 +100,5 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+  console.log(`App listening on port ${PORT}`)
 })
